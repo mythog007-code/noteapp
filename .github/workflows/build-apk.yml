@@ -1,0 +1,40 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: |
+          unzip -q report_app_part3b_flutter.zip
+          mv report_app/* .
+          rm -rf report_app
+          rm report_app_part3b_flutter.zip
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate Android project
+        run: |
+          flutter create --org com.myreports --project-name report_app .
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
